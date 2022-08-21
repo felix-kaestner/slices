@@ -1,44 +1,58 @@
-# Go Library Template
+# Slices
 
 <p align="center">
-    <span>A minimal repository template for Go libraries.</span>
+    <span>The missing map/filter/reduce for <a href="https://pkg.go.dev/golang.org/x/exp/slices">golang.org/x/exp/slices</a></span>
     <br><br>
-    <a href="https://github.com/felix-kaestner/go-library-template/issues">
-        <img alt="Issues" src="https://img.shields.io/github/issues/felix-kaestner/go-library-template?color=29b6f6&style=flat-square">
+    <a href="https://github.com/felix-kaestner/slices/issues">
+        <img alt="Issues" src="https://img.shields.io/github/issues/felix-kaestner/slices?color=29b6f6&style=flat-square">
     </a>
-    <a href="https://github.com/felix-kaestner/go-library-template/stargazers">
-        <img alt="Stars" src="https://img.shields.io/github/stars/felix-kaestner/go-library-template?color=29b6f6&style=flat-square">
+    <a href="https://github.com/felix-kaestner/slices/stargazers">
+        <img alt="Stars" src="https://img.shields.io/github/stars/felix-kaestner/slices?color=29b6f6&style=flat-square">
     </a>
-    <a href="https://github.com/felix-kaestner/go-library-template/blob/main/LICENSE">
-        <img alt="License" src="https://img.shields.io/github/license/felix-kaestner/go-library-template?color=29b6f6&style=flat-square">
+    <a href="https://github.com/felix-kaestner/slices/blob/main/LICENSE">
+        <img alt="License" src="https://img.shields.io/github/license/felix-kaestner/slices?color=29b6f6&style=flat-square">
     </a>
-    <a href="https://pkg.go.dev/github.com/felix-kaestner/go-library-template">
+    <a href="https://pkg.go.dev/github.com/felix-kaestner/slices">
         <img alt="Stars" src="https://img.shields.io/badge/go-documentation-blue?color=29b6f6&style=flat-square">
     </a>
-    <a href="https://goreportcard.com/report/github.com/felix-kaestner/go-library-template">
-        <img alt="Issues" src="https://goreportcard.com/badge/github.com/felix-kaestner/go-library-template?style=flat-square">
+    <a href="https://goreportcard.com/report/github.com/felix-kaestner/slices">
+        <img alt="Issues" src="https://goreportcard.com/badge/github.com/felix-kaestner/slices?style=flat-square">
     </a>
-    <!-- <a href="https://codecov.io/gh/felix-kaestner/go-library-template">
-        <img src="https://img.shields.io/codecov/c/github/felix-kaestner/go-library-template?style=flat-square&token=KK7ZG7A90X"/>
+    <!-- <a href="https://codecov.io/gh/felix-kaestner/slices">
+        <img src="https://img.shields.io/codecov/c/github/felix-kaestner/slices?style=flat-square&token=KK7ZG7A90X"/>
     </a> -->
     <a href="https://twitter.com/kaestner_felix">
         <img alt="Twitter" src="https://img.shields.io/badge/twitter-@kaestner_felix-29b6f6?style=flat-square">
     </a>
 </p>
 
-## Usage 
-
-Simply scaffold a new project using the `Use this template`-Button on the [Repository GitHub Page](https://github.com/felix-kaestner/go-library-template).
-
-<!-- ## Quickstart
+## Quickstart
 
 ```go
 package main
 
-import "github.com/felix-kaestner/go-library-template"
+import "github.com/felix-kaestner/slices"
 
 func main() {
-    // TODO: Do some stuff with the library
+    // Original slice
+    s1 := []int{1, 2, 3, 4, 5}
+    	
+    // Filter only numbers greater than 2
+    s2 := slices.Filter(s1, func(i int) bool { return i > 2 }) 
+    // s2 == []int{3, 4, 5}
+    
+    // Filter only odd numbers in place
+    // This will modify the underlying array of slice s2! Don't use s2 afterwards.
+    s3 := slices.FilterInPlace(s2, func(i int) bool { return i > 2 }
+    // s3 == []int{3, 5}
+    
+    // Map adds 1 to each element
+    s4 := slices.Map(s3, func(i int) int { return i + 1 })
+    // s4 == []int{4, 6}
+    
+    // Reduce sums all numbers in the slice
+    sum := slices.Reduce(s4, func(sum, i int) int { return sum + i })
+    // sum == 10
 }
 ```
 
@@ -47,8 +61,8 @@ func main() {
 Install with the `go get` command:
 
 ```
-$ go get -u github.com/felix-kaestner/go-library-template
-``` -->
+$ go get -u github.com/felix-kaestner/slices
+```
 
 ## Contribute
 
