@@ -43,7 +43,7 @@ func main() {
     
     // Filter only odd numbers in place
     // This will modify the underlying array of slice s2! Don't use s2 afterwards.
-    s3 := slices.FilterInPlace(s2, func(i int) bool { return i > 2 }
+    s3 := slices.FilterInPlace(s2, func(i int) bool { return i > 2 })
     // s3 == []int{3, 5}
     
     // Map adds 1 to each element
