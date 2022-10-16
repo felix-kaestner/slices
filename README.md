@@ -31,28 +31,21 @@
 ```go
 package main
 
-import "github.com/felix-kaestner/slices"
+import (
+    "fmt"
+
+    "github.com/felix-kaestner/slices"
+)
 
 func main() {
-    // Original slice
-    s1 := []int{1, 2, 3, 4, 5}
+    // Original slice of integers
+    numbers := []int{1, 2, 3, 4, 5}
     	
     // Filter only numbers greater than 2
-    s2 := slices.Filter(s1, func(i int) bool { return i > 2 }) 
-    // s2 == []int{3, 4, 5}
+    greaterThanTwo := slices.Filter(s1, func(i int) bool { return i > 2 })
     
-    // Filter only odd numbers in place
-    // This will modify the underlying array of slice s2! Don't use s2 afterwards.
-    s3 := slices.FilterInPlace(s2, func(i int) bool { return i > 2 })
-    // s3 == []int{3, 5}
-    
-    // Map adds 1 to each element
-    s4 := slices.Map(s3, func(i int) int { return i + 1 })
-    // s4 == []int{4, 6}
-    
-    // Reduce sums all numbers in the slice
-    sum := slices.Reduce(s4, func(sum, i int) int { return sum + i })
-    // sum == 10
+    fmt.Println("Numbers > 2:", greaterThanTwo)
+    // Prints "Numbers > 2: []int{3, 4, 5}"
 }
 ```
 
