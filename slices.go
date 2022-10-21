@@ -2,7 +2,10 @@ package slices
 
 import "errors"
 
-var errEmptySlice = errors.New("slices: empty slice")
+var (
+	errEmptySlice      = errors.New("slices: empty slice")
+	errElementNotFound = errors.New("slices: no such element")
+)
 
 // Index returns the index of the first occurrence of v in s,
 // or -1 if not present.
@@ -213,11 +216,28 @@ func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	return s[:n:n]
 }
 
-// Find
-// FindInPlace
+// Find returns the first element in the slice for which the
+// function fn returns true or nil if no such element was found.
+func Find[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
+	for _, e := range s {
+		if fn(e) {
+			return e, nil
+		}
+	}
+	return zeroValue, errElementNotFound
+}
 
-// FindFirst
-// FindLast
+// FindLast returns the last element in the slice for which the
+// function fn returns true or nil if no such element was found.
+func FindLast[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
+    for i := len(s) - 1; i >= 0; i-- {
+        e := s[i]
+        if fn(e) {
+            return e, nil
+        }
+    }
+	return zeroValue, errElementNotFound
+}
 
 // Flatten
 
@@ -231,3 +251,4 @@ func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 // MaxOf
 
 // Reversed
+// ReversedInPlace
