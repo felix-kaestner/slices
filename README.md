@@ -1,7 +1,7 @@
 # Slices
 
 <p align="center">
-    <span>The missing map/filter/reduce for <a href="https://pkg.go.dev/golang.org/x/exp/slices">golang.org/x/exp/slices</a> (requires Go v1.18+).</span>
+    <span>The missing map/filter/reduce (+more) for <a href="https://pkg.go.dev/golang.org/x/exp/slices">golang.org/x/exp/slices</a> (requires Go v1.18+).</span>
     <br><br>
     <a href="https://github.com/felix-kaestner/slices/issues">
         <img alt="Issues" src="https://img.shields.io/github/issues/felix-kaestner/slices?color=29b6f6&style=flat-square">
