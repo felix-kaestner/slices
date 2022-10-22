@@ -2,12 +2,18 @@ package slices
 
 import "errors"
 
+// number is a constraint that permits any numeric type: any type
+// that supports the operators + - * / %.
+type number interface {
+	/* Signed */ ~int | ~int8 | ~int16 | ~int32 | ~int64 | /* Unsigned */ ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | /* Float */ ~float32 | ~float64 | /* Complex */ ~complex64 | ~complex128
+}
+
 var (
 	errEmptySlice      = errors.New("slices: empty slice")
 	errElementNotFound = errors.New("slices: no such element")
 )
 
-// Index returns the index of the first occurrence of v in s,
+// Index returns the index of the first occurrence of v in e,
 // or -1 if not present.
 func Index[E comparable](s []E, v E) int {
 	for i, vs := range s {
@@ -18,12 +24,12 @@ func Index[E comparable](s []E, v E) int {
 	return -1
 }
 
-// Contains reports whether v is present in s.
+// Contains reports whether v is present in e.
 func Contains[E comparable](s []E, v E) bool {
 	return Index(s, v) >= 0
 }
 
-// Filter executes the function fn to each element of the slice s
+// Filter executes the function fn to each element of the slice e
 // returning a newly allocated slice of all elements for which the
 // function fn returns true.
 func Filter[E any](s []E, fn func(e E) bool) []E {
@@ -36,11 +42,11 @@ func Filter[E any](s []E, fn func(e E) bool) []E {
 	return r[:len(r):len(r)]
 }
 
-// FilterInPlace executes the function fn to each element of the slice s
+// FilterInPlace executes the function fn to each element of the slice e
 // returning a slice of all elements for which the function fn returns true.
 //
-// It modifies the underlying array of slice s. Thus, this method should only
-// be used if the passed slice s is not used afterwards!
+// It modifies the underlying array of slice e. Thus, this method should only
+// be used if the passed slice e is not used afterwards!
 func FilterInPlace[E any](s []E, fn func(e E) bool) []E {
 	n := 0
 	for _, e := range s {
@@ -52,8 +58,8 @@ func FilterInPlace[E any](s []E, fn func(e E) bool) []E {
 	return s[:n:n]
 }
 
-// Map applies the function fn to each element of the slice s.
-// It returns a newly allocated slice with same length as s where
+// Map applies the function fn to each element of the slice e.
+// It returns a newly allocated slice with same length as e where
 // each element is the result of calling the function fn on successive
 // elements of the slice.
 func Map[E1, E2 any](s []E1, fn func(e E1) E2) []E2 {
@@ -65,7 +71,7 @@ func Map[E1, E2 any](s []E1, fn func(e E1) E2) []E2 {
 }
 
 // Reduce computes the reduction of the function fn across the
-// elements of the slice s.
+// elements of the slice e.
 //
 // If the slice is empty, Reduce will panic; if it has only one element,
 // it returns that element.
@@ -81,7 +87,7 @@ func Reduce[E any](s []E, fn func(acc, e E) E) E {
 }
 
 // All returns true if the evaluation of the predicate function fn
-// returns true for all elements of the slice s.
+// returns true for all elements of the slice e.
 func All[E any](s []E, fn func(e E) bool) bool {
 	if len(s) == 0 {
 		return false
@@ -95,7 +101,7 @@ func All[E any](s []E, fn func(e E) bool) bool {
 }
 
 // Any returns true if the evaluation of the predicate function fn
-// returns true for at least one element of the slice s.
+// returns true for at least one element of the slice e.
 func Any[E any](s []E, fn func(e E) bool) bool {
 	for _, e := range s {
 		if fn(e) {
@@ -106,7 +112,7 @@ func Any[E any](s []E, fn func(e E) bool) bool {
 }
 
 // Count returns an integer value indicating how many elements
-// of the slice s yield true for the predicate function fn.
+// of the slice e yield true for the predicate function fn.
 func Count[E any](s []E, fn func(e E) bool) uint {
 	i := uint(0)
 	for _, e := range s {
@@ -117,7 +123,7 @@ func Count[E any](s []E, fn func(e E) bool) uint {
 	return i
 }
 
-// AssociateBy returns a map from the elements of the slice s as values
+// AssociateBy returns a map from the elements of the slice e as values
 // with the key retrieved by applying the given function fn.
 func AssociateBy[E any, K comparable](s []E, fn func(e E) K) map[K]E {
 	m := make(map[K]E, len(s))
@@ -127,7 +133,7 @@ func AssociateBy[E any, K comparable](s []E, fn func(e E) K) map[K]E {
 	return m
 }
 
-// AssociateWith returns a map from the elements of the slice s as keys
+// AssociateWith returns a map from the elements of the slice e as keys
 // with the value retrieved by applying the given function fn.
 func AssociateWith[K comparable, V any](s []K, fn func(key K) V) map[K]V {
 	m := make(map[K]V, len(s))
@@ -137,8 +143,22 @@ func AssociateWith[K comparable, V any](s []K, fn func(key K) V) map[K]V {
 	return m
 }
 
+// Flatten returns a single slice of all elements from all slices in the given s.
+func Flatten[E any](s [][]E) []E {
+	n := SumOf(s, func(e []E) int { return len(e) })
+	r := make([]E, n)
+	i := 0
+	for _, e := range s {
+		for _, e := range e {
+			r[i] = e
+			i++
+		}
+	}
+	return r
+}
+
 // Chunked returns a slice of slices, each with the size n containing the
-// elements of the original slice s.
+// elements of the original slice e.
 func Chunked[E any](s []E, n int) [][]E {
 	c := len(s) / n
 	if len(s)%n != 0 {
@@ -171,8 +191,8 @@ func Unique[E comparable](s []E) []E {
 
 // UniqueInPlace returns the unique elements of a slice.
 //
-// It modifies the underlying array of slice s. Thus, this method should only
-// be used if the passed slice s is not used afterwards!
+// It modifies the underlying array of slice e. Thus, this method should only
+// be used if the passed slice e is not used afterwards!
 func UniqueInPlace[E comparable](s []E) []E {
 	n := 0
 	for _, v := range s {
@@ -184,7 +204,7 @@ func UniqueInPlace[E comparable](s []E) []E {
 	return s[:n]
 }
 
-// UniqueBy returns a slice containing only elements from of slice s
+// UniqueBy returns a slice containing only elements from of slice e
 // having unique keys returned by the given selector function fn.
 func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	r := make([]E1, 0, len(s))
@@ -198,11 +218,11 @@ func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	return r[:len(r):len(r)]
 }
 
-// UniqueByInPlace returns a slice containing only elements from of slice s
+// UniqueByInPlace returns a slice containing only elements from of slice e
 // having unique keys returned by the given selector function fn.
 //
-// It modifies the underlying array of slice s. Thus, this method should only
-// be used if the passed slice s is not used afterwards!
+// It modifies the underlying array of slice e. Thus, this method should only
+// be used if the passed slice e is not used afterwards!
 func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	n := 0
 	k := make([]E2, 0, len(s))
@@ -230,22 +250,30 @@ func Find[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
 // FindLast returns the last element in the slice for which the
 // function fn returns true or nil if no such element was found.
 func FindLast[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
-    for i := len(s) - 1; i >= 0; i-- {
-        e := s[i]
-        if fn(e) {
-            return e, nil
-        }
-    }
+	for i := len(s) - 1; i >= 0; i-- {
+		e := s[i]
+		if fn(e) {
+			return e, nil
+		}
+	}
 	return zeroValue, errElementNotFound
 }
-
-// Flatten
 
 // GroupBy
 // Partition
 
 // Intersect
 // Distinct
+
+// SumOf returns the sum of all values produced by applying the function fn
+// to each element of the slice e.
+func SumOf[E any, N number](s []E, fn func(e E) N) N {
+	var n N
+	for _, e := range s {
+		n += fn(e)
+	}
+	return n
+}
 
 // MinOf
 // MaxOf

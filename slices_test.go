@@ -263,6 +263,26 @@ func TestAssociateWith(t *testing.T) {
 	assertEqual(t, expected, actual)
 }
 
+func TestFlatten(t *testing.T) {
+	tests := []struct {
+		s [][]int
+		e []int
+	}{
+		{
+			s: [][]int{{1, 2}, {3, 4}, {5}},
+			e: []int{1, 2, 3, 4, 5},
+		},
+		{
+			s: [][]int{{1, 2, 3, 4}},
+			e: []int{1, 2, 3, 4},
+		},
+	}
+
+	for _, test := range tests {
+		assertEqual(t, test.e, Flatten(test.s))
+	}
+}
+
 func TestChunked(t *testing.T) {
 	tests := []struct {
 		s []int
@@ -445,7 +465,7 @@ func TestFind(t *testing.T) {
 			},
 			err: nil,
 		},
-        {
+		{
 			s: []*Person{
 				{
 					firstname: "Grace",
@@ -461,15 +481,15 @@ func TestFind(t *testing.T) {
 				},
 			},
 			fn: func(p *Person) bool {
-                return p.lastname == "Bernoulli"
+				return p.lastname == "Bernoulli"
 			},
 			e: &Person{
-                firstname: "Jacob",
-                lastname:  "Bernoulli",
+				firstname: "Jacob",
+				lastname:  "Bernoulli",
 			},
 			err: nil,
 		},
-        {
+		{
 			s: []*Person{
 				{
 					firstname: "Jacob",
@@ -483,7 +503,7 @@ func TestFind(t *testing.T) {
 			fn: func(p *Person) bool {
 				return p.lastname == "Hoper"
 			},
-			e: nil,
+			e:   nil,
 			err: errElementNotFound,
 		},
 	}
@@ -530,7 +550,7 @@ func TestFindLast(t *testing.T) {
 			},
 			err: nil,
 		},
-        {
+		{
 			s: []*Person{
 				{
 					firstname: "Grace",
@@ -546,15 +566,15 @@ func TestFindLast(t *testing.T) {
 				},
 			},
 			fn: func(p *Person) bool {
-                return p.lastname == "Bernoulli"
+				return p.lastname == "Bernoulli"
 			},
 			e: &Person{
-                firstname: "Johann",
-                lastname:  "Bernoulli",
+				firstname: "Johann",
+				lastname:  "Bernoulli",
 			},
 			err: nil,
 		},
-        {
+		{
 			s: []*Person{
 				{
 					firstname: "Jacob",
@@ -568,14 +588,30 @@ func TestFindLast(t *testing.T) {
 			fn: func(p *Person) bool {
 				return p.lastname == "Hoper"
 			},
-			e: nil,
+			e:   nil,
 			err: errElementNotFound,
 		},
 	}
 
 	for _, test := range tests {
-        p, err := FindLast(test.s, test.fn)
+		p, err := FindLast(test.s, test.fn)
 		assertEqual(t, test.e, p)
 		assertEqual(t, test.err, err)
+	}
+}
+
+func TestSumOf(t *testing.T) {
+	tests := []struct {
+		s   []int
+		sum int
+	}{
+		{s: nil, sum: 0},
+		{s: []int{}, sum: 0},
+		{s: []int{1}, sum: 1},
+		{s: []int{1, 2, 3, 4, 5}, sum: 15},
+	}
+
+	for _, test := range tests {
+		assertEqual(t, test.sum, SumOf(test.s, func(i int) int { return i }))
 	}
 }
