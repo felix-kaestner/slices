@@ -33,13 +33,15 @@ func Contains[E comparable](s []E, v E) bool {
 // returning a newly allocated slice of all elements for which the
 // function fn returns true.
 func Filter[E any](s []E, fn func(e E) bool) []E {
-	r := make([]E, 0, len(s))
+    n := 0
+	r := make([]E, len(s))
 	for _, e := range s {
 		if fn(e) {
-			r = append(r, e)
+			r[n] = e
+            n++
 		}
 	}
-	return r[:len(r):len(r)]
+	return r[:n:n]
 }
 
 // FilterInPlace executes the function fn to each element of the slice e
@@ -56,6 +58,29 @@ func FilterInPlace[E any](s []E, fn func(e E) bool) []E {
 		}
 	}
 	return s[:n:n]
+}
+
+// Find returns the first element in the slice for which the
+// function fn returns true or nil if no such element was found.
+func Find[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
+	for _, e := range s {
+		if fn(e) {
+			return e, nil
+		}
+	}
+	return zeroValue, errElementNotFound
+}
+
+// FindLast returns the last element in the slice for which the
+// function fn returns true or nil if no such element was found.
+func FindLast[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
+	for i := len(s) - 1; i >= 0; i-- {
+		e := s[i]
+		if fn(e) {
+			return e, nil
+		}
+	}
+	return zeroValue, errElementNotFound
 }
 
 // Map applies the function fn to each element of the slice e.
@@ -114,13 +139,13 @@ func Any[E any](s []E, fn func(e E) bool) bool {
 // Count returns an integer value indicating how many elements
 // of the slice e yield true for the predicate function fn.
 func Count[E any](s []E, fn func(e E) bool) uint {
-	i := uint(0)
+	n := uint(0)
 	for _, e := range s {
 		if fn(e) {
-			i++
+			n++
 		}
 	}
-	return i
+	return n
 }
 
 // AssociateBy returns a map from the elements of the slice e as values
@@ -143,7 +168,42 @@ func AssociateWith[K comparable, V any](s []K, fn func(key K) V) map[K]V {
 	return m
 }
 
-// Flatten returns a single slice of all elements from all slices in the given s.
+// GroupBy groups elements from the slice s by the key returned
+// by the function fn. The resulting map contains group keys associated
+// with a slice of corresponding elements.
+func GroupBy[E any, K comparable](s []E, fn func(e E) K) map[K][]E {
+	m := make(map[K][]E)
+	for _, e := range s {
+		k := fn(e)
+		if v, ok := m[k]; ok {
+			v = append(v, e)
+			m[k] = v
+			continue
+		}
+		m[k] = []E{e}
+	}
+	return m
+}
+
+// Partition splits the slice into a pair of slices, where the first slice
+// contains the elements for which the function fn yielded true, while the
+// second slice contains the elements for which the function fn yielded false.
+func Partition[E any](s []E, fn func(e E) bool) ([]E, []E) {
+	t, f := make([]E, len(s)), make([]E, len(s))
+	i, j := 0, 0
+	for _, e := range s {
+		if fn(e) {
+			t[i] = e
+			i++
+            continue
+		}
+		f[j] = e
+		j++
+	}
+	return t[:i:i], f[:j:j]
+}
+
+// Flatten returns a single slice of all elements from all slices in the given slice s.
 func Flatten[E any](s [][]E) []E {
 	n := SumOf(s, func(e []E) int { return len(e) })
 	r := make([]E, n)
@@ -180,13 +240,15 @@ func Chunked[E any](s []E, n int) [][]E {
 
 // Unique returns the unique elements of a slice.
 func Unique[E comparable](s []E) []E {
-	r := make([]E, 0, len(s))
+    n := 0
+	r := make([]E, len(s))
 	for _, v := range s {
-		if !Contains(r, v) {
-			r = append(r, v)
+		if !Contains(r[:n], v) {
+            r[n] = v
+            n++
 		}
 	}
-	return r[:len(r):len(r)]
+	return r[:n:n]
 }
 
 // UniqueInPlace returns the unique elements of a slice.
@@ -201,21 +263,23 @@ func UniqueInPlace[E comparable](s []E) []E {
 			n++
 		}
 	}
-	return s[:n]
+	return s[:n:n]
 }
 
 // UniqueBy returns a slice containing only elements from of slice e
 // having unique keys returned by the given selector function fn.
 func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
-	r := make([]E1, 0, len(s))
-	k := make([]E2, 0, len(s))
+    n := 0
+	r := make([]E1, len(s))
+	k := make([]E2, len(s))
 	for _, v := range s {
-		if key := fn(v); !Contains(k, key) {
-			k = append(k, key)
-			r = append(r, v)
+		if key := fn(v); !Contains(k[:n], key) {
+			k[n] = key
+			r[n] = v
+            n++
 		}
 	}
-	return r[:len(r):len(r)]
+	return r[:n:n]
 }
 
 // UniqueByInPlace returns a slice containing only elements from of slice e
@@ -225,10 +289,10 @@ func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 // be used if the passed slice e is not used afterwards!
 func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	n := 0
-	k := make([]E2, 0, len(s))
+	k := make([]E2, len(s))
 	for _, v := range s {
 		if key := fn(v); !Contains(k[:n], key) {
-			k = append(k, key)
+			k[n] = key
 			s[n] = v
 			n++
 		}
@@ -236,34 +300,42 @@ func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 	return s[:n:n]
 }
 
-// Find returns the first element in the slice for which the
-// function fn returns true or nil if no such element was found.
-func Find[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
-	for _, e := range s {
-		if fn(e) {
-			return e, nil
-		}
-	}
-	return zeroValue, errElementNotFound
+// Intersect returns slice of all unique elements which are contained in
+// both of the slices.
+func Intersect[E comparable](s1, s2 []E) []E {
+    n := 0
+    u := Unique(s1)
+    r := make([]E, len(u))
+    for _, e := range u {
+        if Contains(s2, e) {
+            r[n] = e
+            n++
+        }
+    }
+    return r[:n:n]
 }
 
-// FindLast returns the last element in the slice for which the
-// function fn returns true or nil if no such element was found.
-func FindLast[E any](s []E, fn func(e E) bool) (zeroValue E, _ error) {
-	for i := len(s) - 1; i >= 0; i-- {
-		e := s[i]
-		if fn(e) {
-			return e, nil
-		}
-	}
-	return zeroValue, errElementNotFound
+// Distinct returns a slice of all unique elements which are only contained in
+// on of the slices
+func Distinct[E comparable](s1, s2 []E) []E {
+    n := 0
+    u1 := Unique(s1)
+    u2 := Unique(s2)
+    r := make([]E, len(u1) + len(u2))
+    for _, e := range u1 {
+        if !Contains(u2, e) {
+            r[n] = e
+            n++
+        }
+    }
+    for _, e := range u2 {
+        if !Contains(u1, e) {
+            r[n] = e
+            n++
+        }
+    }
+    return r[:n:n]
 }
-
-// GroupBy
-// Partition
-
-// Intersect
-// Distinct
 
 // SumOf returns the sum of all values produced by applying the function fn
 // to each element of the slice e.

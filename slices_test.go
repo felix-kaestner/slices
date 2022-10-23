@@ -122,6 +122,176 @@ func TestFilterInPlace(t *testing.T) {
 	}
 }
 
+func TestFind(t *testing.T) {
+	type Person struct {
+		firstname, lastname string
+	}
+
+	tests := []struct {
+		s   []*Person
+		fn  func(p *Person) bool
+		e   *Person
+		err error
+	}{
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Hoper"
+			},
+			e: &Person{
+				firstname: "Grace",
+				lastname:  "Hoper",
+			},
+			err: nil,
+		},
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Bernoulli"
+			},
+			e: &Person{
+				firstname: "Jacob",
+				lastname:  "Bernoulli",
+			},
+			err: nil,
+		},
+		{
+			s: []*Person{
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Hoper"
+			},
+			e:   nil,
+			err: errElementNotFound,
+		},
+	}
+
+	for _, test := range tests {
+		p, err := Find(test.s, test.fn)
+		assertEqual(t, test.e, p)
+		assertEqual(t, test.err, err)
+	}
+}
+
+func TestFindLast(t *testing.T) {
+	type Person struct {
+		firstname, lastname string
+	}
+
+	tests := []struct {
+		s   []*Person
+		fn  func(p *Person) bool
+		e   *Person
+		err error
+	}{
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Hoper"
+			},
+			e: &Person{
+				firstname: "Grace",
+				lastname:  "Hoper",
+			},
+			err: nil,
+		},
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Bernoulli"
+			},
+			e: &Person{
+				firstname: "Johann",
+				lastname:  "Bernoulli",
+			},
+			err: nil,
+		},
+		{
+			s: []*Person{
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			fn: func(p *Person) bool {
+				return p.lastname == "Hoper"
+			},
+			e:   nil,
+			err: errElementNotFound,
+		},
+	}
+
+	for _, test := range tests {
+		p, err := FindLast(test.s, test.fn)
+		assertEqual(t, test.e, p)
+		assertEqual(t, test.err, err)
+	}
+}
+
 func TestMap(t *testing.T) {
 	tests := []struct {
 		s, e []int
@@ -261,6 +431,91 @@ func TestAssociateWith(t *testing.T) {
 		"Bernoulli": {"Johann", "Bernoulli"},
 	}
 	assertEqual(t, expected, actual)
+}
+
+func TestGroupBy(t *testing.T) {
+	type Person struct {
+		firstname, lastname string
+	}
+
+	tests := []struct {
+		s []*Person
+		e map[string][]*Person
+	}{
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			e: map[string][]*Person{
+				"Hoper":     {{"Grace", "Hoper"}},
+				"Bernoulli": {{"Jacob", "Bernoulli"}, {"Johann", "Bernoulli"}},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		assertEqual(t, test.e, GroupBy(test.s, func(p *Person) string { return p.lastname }))
+	}
+}
+
+func TestPartition(t *testing.T) {
+	type Person struct {
+		firstname, lastname string
+	}
+
+	tests := []struct {
+		s, e1, e2 []*Person
+	}{
+		{
+			s: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+			e1: []*Person{
+				{
+					firstname: "Grace",
+					lastname:  "Hoper",
+				},
+			},
+			e2: []*Person{
+				{
+					firstname: "Jacob",
+					lastname:  "Bernoulli",
+				},
+				{
+					firstname: "Johann",
+					lastname:  "Bernoulli",
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+        e1, e2 := Partition(test.s, func(p *Person) bool { return p.lastname == "Hoper" })
+		assertEqual(t, test.e1, e1)
+        assertEqual(t, test.e2, e2)
+	}
 }
 
 func TestFlatten(t *testing.T) {
@@ -430,174 +685,36 @@ func TestUniqueByInPlace(t *testing.T) {
 	}
 }
 
-func TestFind(t *testing.T) {
-	type Person struct {
-		firstname, lastname string
-	}
+func TestIntersect(t *testing.T) {
+    tests := []struct {
+        s1, s2, e   []int
+    }{
+        {s1: []int{}, s2: []int{}, e: []int{}},
+        {s1: []int{1}, s2: []int{}, e: []int{}},
+        {s1: []int{}, s2: []int{1}, e: []int{}},
+        {s1: []int{1}, s2: []int{1}, e: []int{1}},
+        {s1: []int{1, 2}, s2: []int{1}, e: []int{1}},
+    }
 
-	tests := []struct {
-		s   []*Person
-		fn  func(p *Person) bool
-		e   *Person
-		err error
-	}{
-		{
-			s: []*Person{
-				{
-					firstname: "Grace",
-					lastname:  "Hoper",
-				},
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Hoper"
-			},
-			e: &Person{
-				firstname: "Grace",
-				lastname:  "Hoper",
-			},
-			err: nil,
-		},
-		{
-			s: []*Person{
-				{
-					firstname: "Grace",
-					lastname:  "Hoper",
-				},
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Bernoulli"
-			},
-			e: &Person{
-				firstname: "Jacob",
-				lastname:  "Bernoulli",
-			},
-			err: nil,
-		},
-		{
-			s: []*Person{
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Hoper"
-			},
-			e:   nil,
-			err: errElementNotFound,
-		},
-	}
-
-	for _, test := range tests {
-		p, err := Find(test.s, test.fn)
-		assertEqual(t, test.e, p)
-		assertEqual(t, test.err, err)
-	}
+    for _, test := range tests {
+        assertEqual(t, test.e, Intersect(test.s1, test.s2))
+    }
 }
 
-func TestFindLast(t *testing.T) {
-	type Person struct {
-		firstname, lastname string
-	}
+func TestDistinct(t *testing.T) {
+    tests := []struct {
+        s1, s2, e   []int
+    }{
+        {s1: []int{}, s2: []int{}, e: []int{}},
+        {s1: []int{1}, s2: []int{}, e: []int{1}},
+        {s1: []int{}, s2: []int{1}, e: []int{1}},
+        {s1: []int{1}, s2: []int{1}, e: []int{}},
+        {s1: []int{1, 2}, s2: []int{1}, e: []int{2}},
+    }
 
-	tests := []struct {
-		s   []*Person
-		fn  func(p *Person) bool
-		e   *Person
-		err error
-	}{
-		{
-			s: []*Person{
-				{
-					firstname: "Grace",
-					lastname:  "Hoper",
-				},
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Hoper"
-			},
-			e: &Person{
-				firstname: "Grace",
-				lastname:  "Hoper",
-			},
-			err: nil,
-		},
-		{
-			s: []*Person{
-				{
-					firstname: "Grace",
-					lastname:  "Hoper",
-				},
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Bernoulli"
-			},
-			e: &Person{
-				firstname: "Johann",
-				lastname:  "Bernoulli",
-			},
-			err: nil,
-		},
-		{
-			s: []*Person{
-				{
-					firstname: "Jacob",
-					lastname:  "Bernoulli",
-				},
-				{
-					firstname: "Johann",
-					lastname:  "Bernoulli",
-				},
-			},
-			fn: func(p *Person) bool {
-				return p.lastname == "Hoper"
-			},
-			e:   nil,
-			err: errElementNotFound,
-		},
-	}
-
-	for _, test := range tests {
-		p, err := FindLast(test.s, test.fn)
-		assertEqual(t, test.e, p)
-		assertEqual(t, test.err, err)
-	}
+    for _, test := range tests {
+        assertEqual(t, test.e, Distinct(test.s1, test.s2))
+    }
 }
 
 func TestSumOf(t *testing.T) {
