@@ -3,7 +3,6 @@ package slices
 import (
 	"reflect"
 	"testing"
-	"unsafe"
 )
 
 func isNil(i any) bool {
@@ -94,6 +93,8 @@ func TestFilter(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+		{s: nil, e: nil},
+		{s: []int{}, e: []int{}},
 		{s: []int{1, 2, 3, 4, 5}, e: []int{3, 4, 5}},
 	}
 
@@ -101,8 +102,8 @@ func TestFilter(t *testing.T) {
 		gt2 := Filter(test.s, func(i int) bool { return i > 2 })
 		assertEqual(t, test.e, gt2)
 		assertEqual(t, cap(test.e), cap(gt2))
-		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&gt2[0]) {
-			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
+        if len(test.s) > 0 && reflect.ValueOf(test.s).Pointer() == reflect.ValueOf(gt2).Pointer() {
+			t.Errorf("Test %s: Expected slices not to reference the same array", t.Name())
 		}
 	}
 }
@@ -111,6 +112,8 @@ func TestFilterInPlace(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+        {s: nil, e: nil},
+        {s: []int{}, e: []int{}},
 		{s: []int{1, 2, 3, 4, 5}, e: []int{3, 4, 5}},
 	}
 
@@ -118,7 +121,7 @@ func TestFilterInPlace(t *testing.T) {
 		gt2 := FilterInPlace(test.s, func(i int) bool { return i > 2 })
 		assertEqual(t, test.e, gt2)
 		assertEqual(t, cap(test.e), cap(gt2))
-		assertEqual(t, unsafe.Pointer(&test.s[0]), unsafe.Pointer(&gt2[0]))
+        assertEqual(t, reflect.ValueOf(test.s).Pointer(), reflect.ValueOf(gt2).Pointer())
 	}
 }
 
@@ -296,6 +299,8 @@ func TestMap(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+        {s: nil, e: []int{}},
+		{s: []int{}, e: []int{}},
 		{s: []int{1, 2, 3, 4, 5}, e: []int{2, 4, 6, 8, 10}},
 	}
 
@@ -303,9 +308,6 @@ func TestMap(t *testing.T) {
 		times2 := Map(test.s, func(i int) int { return i * 2 })
 		assertEqual(t, test.e, times2)
 		assertEqual(t, cap(test.e), cap(times2))
-		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&times2[0]) {
-			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
-		}
 	}
 }
 
@@ -565,14 +567,16 @@ func TestUnique(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+		{s: nil, e: nil},
+		{s: []int{}, e: []int{}},
 		{s: []int{1, 2, 2, 3, 3, 3}, e: []int{1, 2, 3}},
 	}
 
 	for _, test := range tests {
 		unique := Unique(test.s)
 		assertEqual(t, test.e, unique)
-		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&unique[0]) {
-			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
+        if len(test.s) > 0 && reflect.ValueOf(test.s).Pointer() == reflect.ValueOf(unique).Pointer() {
+			t.Errorf("Test %s: Expected slices not to reference the same array", t.Name())
 		}
 	}
 }
@@ -581,13 +585,15 @@ func TestUniqueInPlace(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+		{s: nil, e: nil},
+		{s: []int{}, e: []int{}},
 		{s: []int{1, 2, 2, 3, 3, 3}, e: []int{1, 2, 3}},
 	}
 
 	for _, test := range tests {
 		unique := UniqueInPlace(test.s)
 		assertEqual(t, test.e, unique)
-		assertEqual(t, unsafe.Pointer(&test.s[0]), unsafe.Pointer(&unique[0]))
+        assertEqual(t, reflect.ValueOf(test.s).Pointer(), reflect.ValueOf(unique).Pointer())
 	}
 }
 
@@ -633,8 +639,8 @@ func TestUniqueBy(t *testing.T) {
 		})
 		assertEqual(t, test.e, unique)
 		assertEqual(t, cap(test.e), cap(unique))
-		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&unique[0]) {
-			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
+        if len(test.s) > 0 && reflect.ValueOf(test.s).Pointer() == reflect.ValueOf(unique).Pointer() {
+            t.Errorf("Test %s: Expected slices not to reference the same array", t.Name())
 		}
 	}
 }
@@ -681,7 +687,7 @@ func TestUniqueByInPlace(t *testing.T) {
 		})
 		assertEqual(t, test.e, unique)
 		assertEqual(t, cap(test.e), cap(unique))
-		assertEqual(t, unsafe.Pointer(&test.s[0]), unsafe.Pointer(&unique[0]))
+        assertEqual(t, reflect.ValueOf(test.s).Pointer(), reflect.ValueOf(unique).Pointer())
 	}
 }
 
@@ -771,14 +777,16 @@ func TestReverse(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+		{s: nil, e: nil},
+		{s: []int{}, e: []int{}},
 		{s: []int{1, 2, 3}, e: []int{3, 2, 1}},
 	}
 
 	for _, test := range tests {
 		reversed := Reverse(test.s)
 		assertEqual(t, test.e, reversed)
-		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&reversed[0]) {
-			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
+        if len(test.s) > 0 && reflect.ValueOf(test.s).Pointer() == reflect.ValueOf(reversed).Pointer() {
+			t.Errorf("Test %s: Expected slices not to reference the same array", t.Name())
 		}
 	}
 }
@@ -787,12 +795,14 @@ func TestReverseInPlace(t *testing.T) {
 	tests := []struct {
 		s, e []int
 	}{
+        {s: nil, e: nil},
+        {s: []int{}, e: []int{}},
 		{s: []int{1, 2, 3}, e: []int{3, 2, 1}},
 	}
 
 	for _, test := range tests {
 		reversed := ReverseInPlace(test.s)
 		assertEqual(t, test.e, reversed)
-		assertEqual(t, unsafe.Pointer(&test.s[0]), unsafe.Pointer(&reversed[0]))
+        assertEqual(t, reflect.ValueOf(test.s).Pointer(), reflect.ValueOf(reversed).Pointer())
 	}
 }

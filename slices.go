@@ -42,6 +42,9 @@ func Contains[E comparable](s []E, v E) bool {
 // returning a newly allocated slice of all elements for which the
 // function fn returns true.
 func Filter[E any](s []E, fn func(e E) bool) []E {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	r := make([]E, len(s))
 	for _, e := range s {
@@ -59,6 +62,9 @@ func Filter[E any](s []E, fn func(e E) bool) []E {
 // It modifies the underlying array of slice e. Thus, this method should only
 // be used if the passed slice e is not used afterwards!
 func FilterInPlace[E any](s []E, fn func(e E) bool) []E {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	for _, e := range s {
 		if fn(e) {
@@ -249,6 +255,9 @@ func Chunked[E any](s []E, n int) [][]E {
 
 // Unique returns the unique elements of a slice.
 func Unique[E comparable](s []E) []E {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	r := make([]E, len(s))
 	for _, v := range s {
@@ -265,6 +274,9 @@ func Unique[E comparable](s []E) []E {
 // It modifies the underlying array of slice e. Thus, this method should only
 // be used if the passed slice e is not used afterwards!
 func UniqueInPlace[E comparable](s []E) []E {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	for _, v := range s {
 		if !Contains(s[:n], v) {
@@ -278,6 +290,9 @@ func UniqueInPlace[E comparable](s []E) []E {
 // UniqueBy returns a slice containing only elements from of slice e
 // having unique keys returned by the given selector function fn.
 func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	r := make([]E1, len(s))
 	k := make([]E2, len(s))
@@ -297,6 +312,9 @@ func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 // It modifies the underlying array of slice e. Thus, this method should only
 // be used if the passed slice e is not used afterwards!
 func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
+    if len(s) == 0 {
+        return s
+    }
 	n := 0
 	k := make([]E2, len(s))
 	for _, v := range s {
@@ -388,6 +406,9 @@ func MaxOf[E any, N ordered](s []E, fn func(e E) N) N {
 
 // Reverse returns a slice with all elements in reversed order.
 func Reverse[E any](s []E) []E {
+    if len(s) == 0 {
+        return s
+    }
 	r := make([]E, len(s))
 	j := len(s) - 1
 	for i := j; i >= 0; i-- {
