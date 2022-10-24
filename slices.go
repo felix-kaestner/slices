@@ -386,5 +386,26 @@ func MaxOf[E any, N ordered](s []E, fn func(e E) N) N {
 	return max
 }
 
-// Reversed
-// ReversedInPlace
+// Reverse returns a slice with all elements in reversed order.
+func Reverse[E any](s []E) []E {
+	r := make([]E, len(s))
+	j := len(s) - 1
+	for i := j; i >= 0; i-- {
+		r[j-i] = s[i]
+	}
+	return r
+}
+
+// ReverseInPlace returns a slice with all elements in reversed order.
+//
+// It modifies the underlying array of slice e. Thus, this method should only
+// be used if the passed slice e is not used afterwards!
+func ReverseInPlace[E any](s []E) []E {
+    if len(s) == 0 {
+        return s
+    }
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}

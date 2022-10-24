@@ -766,3 +766,33 @@ func TestMaxOf(t *testing.T) {
 	assertPanic(t, errEmptySlice, func() { MinOf(nil, func(i int) int { return i }) })
 	assertPanic(t, errEmptySlice, func() { MinOf([]int{}, func(i int) int { return i }) })
 }
+
+func TestReverse(t *testing.T) {
+	tests := []struct {
+		s, e []int
+	}{
+		{s: []int{1, 2, 3}, e: []int{3, 2, 1}},
+	}
+
+	for _, test := range tests {
+		reversed := Reverse(test.s)
+		assertEqual(t, test.e, reversed)
+		if unsafe.Pointer(&test.s[0]) == unsafe.Pointer(&reversed[0]) {
+			t.Errorf("Test %s: Expected s1 and s2 to not be the same slice", t.Name())
+		}
+	}
+}
+
+func TestReverseInPlace(t *testing.T) {
+	tests := []struct {
+		s, e []int
+	}{
+		{s: []int{1, 2, 3}, e: []int{3, 2, 1}},
+	}
+
+	for _, test := range tests {
+		reversed := ReverseInPlace(test.s)
+		assertEqual(t, test.e, reversed)
+		assertEqual(t, unsafe.Pointer(&test.s[0]), unsafe.Pointer(&reversed[0]))
+	}
+}
