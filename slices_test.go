@@ -512,9 +512,9 @@ func TestPartition(t *testing.T) {
 	}
 
 	for _, test := range tests {
-        e1, e2 := Partition(test.s, func(p *Person) bool { return p.lastname == "Hoper" })
+		e1, e2 := Partition(test.s, func(p *Person) bool { return p.lastname == "Hoper" })
 		assertEqual(t, test.e1, e1)
-        assertEqual(t, test.e2, e2)
+		assertEqual(t, test.e2, e2)
 	}
 }
 
@@ -686,35 +686,35 @@ func TestUniqueByInPlace(t *testing.T) {
 }
 
 func TestIntersect(t *testing.T) {
-    tests := []struct {
-        s1, s2, e   []int
-    }{
-        {s1: []int{}, s2: []int{}, e: []int{}},
-        {s1: []int{1}, s2: []int{}, e: []int{}},
-        {s1: []int{}, s2: []int{1}, e: []int{}},
-        {s1: []int{1}, s2: []int{1}, e: []int{1}},
-        {s1: []int{1, 2}, s2: []int{1}, e: []int{1}},
-    }
+	tests := []struct {
+		s1, s2, e []int
+	}{
+		{s1: []int{}, s2: []int{}, e: []int{}},
+		{s1: []int{1}, s2: []int{}, e: []int{}},
+		{s1: []int{}, s2: []int{1}, e: []int{}},
+		{s1: []int{1}, s2: []int{1}, e: []int{1}},
+		{s1: []int{1, 2}, s2: []int{1}, e: []int{1}},
+	}
 
-    for _, test := range tests {
-        assertEqual(t, test.e, Intersect(test.s1, test.s2))
-    }
+	for _, test := range tests {
+		assertEqual(t, test.e, Intersect(test.s1, test.s2))
+	}
 }
 
 func TestDistinct(t *testing.T) {
-    tests := []struct {
-        s1, s2, e   []int
-    }{
-        {s1: []int{}, s2: []int{}, e: []int{}},
-        {s1: []int{1}, s2: []int{}, e: []int{1}},
-        {s1: []int{}, s2: []int{1}, e: []int{1}},
-        {s1: []int{1}, s2: []int{1}, e: []int{}},
-        {s1: []int{1, 2}, s2: []int{1}, e: []int{2}},
-    }
+	tests := []struct {
+		s1, s2, e []int
+	}{
+		{s1: []int{}, s2: []int{}, e: []int{}},
+		{s1: []int{1}, s2: []int{}, e: []int{1}},
+		{s1: []int{}, s2: []int{1}, e: []int{1}},
+		{s1: []int{1}, s2: []int{1}, e: []int{}},
+		{s1: []int{1, 2}, s2: []int{1}, e: []int{2}},
+	}
 
-    for _, test := range tests {
-        assertEqual(t, test.e, Distinct(test.s1, test.s2))
-    }
+	for _, test := range tests {
+		assertEqual(t, test.e, Distinct(test.s1, test.s2))
+	}
 }
 
 func TestSumOf(t *testing.T) {
@@ -731,4 +731,38 @@ func TestSumOf(t *testing.T) {
 	for _, test := range tests {
 		assertEqual(t, test.sum, SumOf(test.s, func(i int) int { return i }))
 	}
+}
+
+func TestMinOf(t *testing.T) {
+	tests := []struct {
+		s   []int
+		min int
+	}{
+		{s: []int{1}, min: 1},
+		{s: []int{1, 2, 3, 4, 5}, min: 1},
+	}
+
+	for _, test := range tests {
+		assertEqual(t, test.min, MinOf(test.s, func(i int) int { return i }))
+	}
+
+	assertPanic(t, errEmptySlice, func() { MinOf(nil, func(i int) int { return i }) })
+	assertPanic(t, errEmptySlice, func() { MinOf([]int{}, func(i int) int { return i }) })
+}
+
+func TestMaxOf(t *testing.T) {
+	tests := []struct {
+		s   []int
+		max int
+	}{
+		{s: []int{1}, max: 1},
+		{s: []int{1, 2, 3, 4, 5}, max: 5},
+	}
+
+	for _, test := range tests {
+		assertEqual(t, test.max, MaxOf(test.s, func(i int) int { return i }))
+	}
+
+	assertPanic(t, errEmptySlice, func() { MinOf(nil, func(i int) int { return i }) })
+	assertPanic(t, errEmptySlice, func() { MinOf([]int{}, func(i int) int { return i }) })
 }

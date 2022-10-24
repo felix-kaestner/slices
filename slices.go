@@ -8,6 +8,15 @@ type number interface {
 	/* Signed */ ~int | ~int8 | ~int16 | ~int32 | ~int64 | /* Unsigned */ ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | /* Float */ ~float32 | ~float64 | /* Complex */ ~complex64 | ~complex128
 }
 
+// ordered is a constraint that permits any ordered type: any type
+// that supports the operators < <= >= >.
+// If future releases of Go add new ordered types,
+// this constraint will be modified to include them.
+// Based on: https://pkg.go.dev/golang.org/x/exp/constraints#Ordered
+type ordered interface {
+	/* Signed */ ~int | ~int8 | ~int16 | ~int32 | ~int64 | /* Unsigned */ ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | /* Float */ ~float32 | ~float64 | /* String */ ~string
+}
+
 var (
 	errEmptySlice      = errors.New("slices: empty slice")
 	errElementNotFound = errors.New("slices: no such element")
@@ -33,12 +42,12 @@ func Contains[E comparable](s []E, v E) bool {
 // returning a newly allocated slice of all elements for which the
 // function fn returns true.
 func Filter[E any](s []E, fn func(e E) bool) []E {
-    n := 0
+	n := 0
 	r := make([]E, len(s))
 	for _, e := range s {
 		if fn(e) {
 			r[n] = e
-            n++
+			n++
 		}
 	}
 	return r[:n:n]
@@ -195,7 +204,7 @@ func Partition[E any](s []E, fn func(e E) bool) ([]E, []E) {
 		if fn(e) {
 			t[i] = e
 			i++
-            continue
+			continue
 		}
 		f[j] = e
 		j++
@@ -240,12 +249,12 @@ func Chunked[E any](s []E, n int) [][]E {
 
 // Unique returns the unique elements of a slice.
 func Unique[E comparable](s []E) []E {
-    n := 0
+	n := 0
 	r := make([]E, len(s))
 	for _, v := range s {
 		if !Contains(r[:n], v) {
-            r[n] = v
-            n++
+			r[n] = v
+			n++
 		}
 	}
 	return r[:n:n]
@@ -269,14 +278,14 @@ func UniqueInPlace[E comparable](s []E) []E {
 // UniqueBy returns a slice containing only elements from of slice e
 // having unique keys returned by the given selector function fn.
 func UniqueBy[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
-    n := 0
+	n := 0
 	r := make([]E1, len(s))
 	k := make([]E2, len(s))
 	for _, v := range s {
 		if key := fn(v); !Contains(k[:n], key) {
 			k[n] = key
 			r[n] = v
-            n++
+			n++
 		}
 	}
 	return r[:n:n]
@@ -303,41 +312,41 @@ func UniqueByInPlace[E1 any, E2 comparable](s []E1, fn func(e E1) E2) []E1 {
 // Intersect returns slice of all unique elements which are contained in
 // both of the slices.
 func Intersect[E comparable](s1, s2 []E) []E {
-    n := 0
-    u := Unique(s1)
-    r := make([]E, len(u))
-    for _, e := range u {
-        if Contains(s2, e) {
-            r[n] = e
-            n++
-        }
-    }
-    return r[:n:n]
+	n := 0
+	u := Unique(s1)
+	r := make([]E, len(u))
+	for _, e := range u {
+		if Contains(s2, e) {
+			r[n] = e
+			n++
+		}
+	}
+	return r[:n:n]
 }
 
 // Distinct returns a slice of all unique elements which are only contained in
 // on of the slices
 func Distinct[E comparable](s1, s2 []E) []E {
-    n := 0
-    u1 := Unique(s1)
-    u2 := Unique(s2)
-    r := make([]E, len(u1) + len(u2))
-    for _, e := range u1 {
-        if !Contains(u2, e) {
-            r[n] = e
-            n++
-        }
-    }
-    for _, e := range u2 {
-        if !Contains(u1, e) {
-            r[n] = e
-            n++
-        }
-    }
-    return r[:n:n]
+	n := 0
+	u1 := Unique(s1)
+	u2 := Unique(s2)
+	r := make([]E, len(u1)+len(u2))
+	for _, e := range u1 {
+		if !Contains(u2, e) {
+			r[n] = e
+			n++
+		}
+	}
+	for _, e := range u2 {
+		if !Contains(u1, e) {
+			r[n] = e
+			n++
+		}
+	}
+	return r[:n:n]
 }
 
-// SumOf returns the sum of all values produced by applying the function fn
+// SumOf returns the max of all values produced by applying the function fn
 // to each element of the slice e.
 func SumOf[E any, N number](s []E, fn func(e E) N) N {
 	var n N
@@ -347,8 +356,35 @@ func SumOf[E any, N number](s []E, fn func(e E) N) N {
 	return n
 }
 
-// MinOf
-// MaxOf
+// MinOf returns the smallest value among the values produced by applying the
+// function fn to each element in the slice s.
+func MinOf[E any, N ordered](s []E, fn func(e E) N) N {
+	if len(s) == 0 {
+		panic(errEmptySlice)
+	}
+	min := fn(s[0])
+	for _, e := range s[1:] {
+		if n := fn(e); n < min {
+			min = n
+		}
+	}
+	return min
+}
+
+// MaxOf returns the largest value among the values produced by applying the
+// function fn to each element in the slice s.
+func MaxOf[E any, N ordered](s []E, fn func(e E) N) N {
+	if len(s) == 0 {
+		panic(errEmptySlice)
+	}
+	max := fn(s[0])
+	for _, e := range s[1:] {
+		if n := fn(e); n > max {
+			max = n
+		}
+	}
+	return max
+}
 
 // Reversed
 // ReversedInPlace
