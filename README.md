@@ -18,9 +18,9 @@
     <a href="https://goreportcard.com/report/github.com/felix-kaestner/slices">
         <img alt="Issues" src="https://goreportcard.com/badge/github.com/felix-kaestner/slices?style=flat-square">
     </a>
-    <!-- <a href="https://codecov.io/gh/felix-kaestner/slices">
-        <img src="https://img.shields.io/codecov/c/github/felix-kaestner/slices?style=flat-square&token=KK7ZG7A90X"/>
-    </a> -->
+    <a href="https://codecov.io/gh/felix-kaestner/slices">
+        <img src="https://img.shields.io/codecov/c/github/felix-kaestner/slices?style=flat-square&token=R3OVLPMFB9"/>
+    </a>
     <a href="https://twitter.com/kaestner_felix">
         <img alt="Twitter" src="https://img.shields.io/badge/twitter-@kaestner_felix-29b6f6?style=flat-square">
     </a>
